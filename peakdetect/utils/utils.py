@@ -202,11 +202,13 @@ def ap_per_class(tp, conf, pred_cls, target_cls):
     # Find unique classes
     unique_classes = np.unique(target_cls)
 
+
     # Create Precision-Recall curve and compute AP for each class
     ap, p, r = [], [], []
     with tqdm(unique_classes, unit="batch", disable=False, leave=False) as tepoch:
         for c in tepoch:
             i = pred_cls == c
+                
             n_gt = (target_cls == c).sum()  # Number of ground truth objects
             n_p = i.sum()  # Number of predicted objects
 

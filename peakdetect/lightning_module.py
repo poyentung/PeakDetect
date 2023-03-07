@@ -63,6 +63,7 @@ class EDPeakDector(pl.LightningModule):
         imgs = imgs.to(dtype=torch.float)
         # Extract labels
         labels = targets[:, 1].tolist()
+        
         # Rescale target
         targets[:, 2:] = xywh2xyxy(targets[:, 2:])
         targets[:, 2:] *= imgs.size(3)
@@ -83,7 +84,7 @@ class EDPeakDector(pl.LightningModule):
         labels=[]
         sample_metrics=[]
         for batch in valid_step_outputs:
-            labels+=batch['labels']
+            labels+=torch.stack(batch['labels']).detach().cpu()
             sample_metrics+=batch['sample_metrics']
 
         true_positives, pred_scores, pred_labels = [
@@ -108,7 +109,7 @@ class EDPeakDector(pl.LightningModule):
 
         ap_dict = {}
         for i, c in enumerate(ap_class):
-            ap_dict[self.class_names[c]] = AP[i]
+            ap_dict[self.class_names[c]] = AP[i].astype(np.float32)  
         self.log_dict(ap_dict, on_step=False, on_epoch=True)
 
     def predict_step(self, batch, batch_idx):
